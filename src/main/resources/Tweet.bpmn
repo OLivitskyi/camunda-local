@@ -1,78 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1bvy7x5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.7.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
-  <bpmn:process id="TwitterQAProcess" name="Tweet" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1" name="Tweet recived">
+  <bpmn:process id="TweetProcess" name="Tweet" isExecutable="true">
+    <bpmn:startEvent id="TweetRecivedStartEvent" name="Tweet recived">
       <bpmn:outgoing>Flow_0d6h9ec</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_0d6h9ec" sourceRef="StartEvent_1" targetRef="Activity_1htx34i" />
-    <bpmn:endEvent id="Event_0ty5302" name="Tweet handled">
+    <bpmn:sequenceFlow id="Flow_0d6h9ec" sourceRef="TweetRecivedStartEvent" targetRef="ReviewTweetTask" />
+    <bpmn:endEvent id="TweetHandledEndEvent" name="Tweet handled">
       <bpmn:incoming>Flow_1rrygea</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0cm79ed" sourceRef="Activity_1htx34i" targetRef="Gateway_0w1xcrh" />
-    <bpmn:exclusiveGateway id="Gateway_0w1xcrh" name="Approved?">
+    <bpmn:sequenceFlow id="Flow_0cm79ed" sourceRef="ReviewTweetTask" targetRef="ApprovedGateway" />
+    <bpmn:exclusiveGateway id="ApprovedGateway" name="Approved?">
       <bpmn:incoming>Flow_0cm79ed</bpmn:incoming>
-      <bpmn:outgoing>Flow_0udl7ba</bpmn:outgoing>
-      <bpmn:outgoing>Flow_16ti6yq</bpmn:outgoing>
+      <bpmn:outgoing>YesSequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>NoSequenceFlow</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_0udl7ba" name="yes" sourceRef="Gateway_0w1xcrh" targetRef="Activity_1rzh25p">
+    <bpmn:sequenceFlow id="YesSequenceFlow" name="yes" sourceRef="ApprovedGateway" targetRef="PublishOnTwitterTask">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1rrygea" sourceRef="Activity_1rzh25p" targetRef="Event_0ty5302" />
-    <bpmn:sequenceFlow id="Flow_16ti6yq" name="no" sourceRef="Gateway_0w1xcrh" targetRef="Activity_0shm435">
+    <bpmn:sequenceFlow id="Flow_1rrygea" sourceRef="PublishOnTwitterTask" targetRef="TweetHandledEndEvent" />
+    <bpmn:sequenceFlow id="NoSequenceFlow" name="no" sourceRef="ApprovedGateway" targetRef="NotifyEmployeOfRejectionTask">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{approved == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_0wktwe4" name="Tweet rejected">
+    <bpmn:endEvent id="TweetRejectedEndEvent" name="Tweet rejected">
       <bpmn:incoming>Flow_14ma613</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_14ma613" sourceRef="Activity_0shm435" targetRef="Event_0wktwe4" />
-    <bpmn:scriptTask id="Activity_0shm435" name="Notify employe of rejection" scriptFormat="javascript">
-      <bpmn:incoming>Flow_16ti6yq</bpmn:incoming>
+    <bpmn:sequenceFlow id="Flow_14ma613" sourceRef="NotifyEmployeOfRejectionTask" targetRef="TweetRejectedEndEvent" />
+    <bpmn:scriptTask id="NotifyEmployeOfRejectionTask" name="Notify employe of rejection" scriptFormat="javascript">
+      <bpmn:incoming>NoSequenceFlow</bpmn:incoming>
       <bpmn:outgoing>Flow_14ma613</bpmn:outgoing>
       <bpmn:script>print('Tweet rejected');</bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:serviceTask id="Activity_1rzh25p" name="Publish on Twitter" camunda:class="com.camunda.training.CreateTweetDelegate">
-      <bpmn:incoming>Flow_0udl7ba</bpmn:incoming>
+    <bpmn:serviceTask id="PublishOnTwitterTask" name="Publish on Twitter" camunda:class="com.camunda.training.CreateTweetDelegate">
+      <bpmn:incoming>YesSequenceFlow</bpmn:incoming>
       <bpmn:outgoing>Flow_1rrygea</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:scriptTask id="Activity_1htx34i" name="Review Tweet" scriptFormat="javaScript">
+    <bpmn:userTask id="ReviewTweetTask" name="Review Tweet" camunda:candidateGroups="management">
       <bpmn:incoming>Flow_0d6h9ec</bpmn:incoming>
       <bpmn:outgoing>Flow_0cm79ed</bpmn:outgoing>
-      <bpmn:script>print('Start process');</bpmn:script>
-    </bpmn:scriptTask>
+    </bpmn:userTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TwitterQAProcess">
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TweetProcess">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="TweetRecivedStartEvent">
         <dc:Bounds x="179" y="109" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="165" y="152" width="68" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0ty5302_di" bpmnElement="Event_0ty5302">
+      <bpmndi:BPMNShape id="Event_0ty5302_di" bpmnElement="TweetHandledEndEvent">
         <dc:Bounds x="682" y="109" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="666" y="152" width="72" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0w1xcrh_di" bpmnElement="Gateway_0w1xcrh" isMarkerVisible="true">
+      <bpmndi:BPMNShape id="Gateway_0w1xcrh_di" bpmnElement="ApprovedGateway" isMarkerVisible="true">
         <dc:Bounds x="435" y="102" width="50" height="50" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="433" y="78" width="54" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0wktwe4_di" bpmnElement="Event_0wktwe4">
+      <bpmndi:BPMNShape id="Event_0wktwe4_di" bpmnElement="TweetRejectedEndEvent">
         <dc:Bounds x="682" y="222" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="666" y="265" width="72" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1fxc5uq_di" bpmnElement="Activity_0shm435">
+      <bpmndi:BPMNShape id="Activity_1fxc5uq_di" bpmnElement="NotifyEmployeOfRejectionTask">
         <dc:Bounds x="530" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0e0knnd_di" bpmnElement="Activity_1rzh25p">
+      <bpmndi:BPMNShape id="Activity_0e0knnd_di" bpmnElement="PublishOnTwitterTask">
         <dc:Bounds x="550" y="87" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1848ga7_di" bpmnElement="Activity_1htx34i">
+      <bpmndi:BPMNShape id="Activity_18hvanm_di" bpmnElement="ReviewTweetTask">
         <dc:Bounds x="270" y="87" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0d6h9ec_di" bpmnElement="Flow_0d6h9ec">
@@ -83,7 +82,7 @@
         <di:waypoint x="370" y="127" />
         <di:waypoint x="435" y="127" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0udl7ba_di" bpmnElement="Flow_0udl7ba">
+      <bpmndi:BPMNEdge id="Flow_0udl7ba_di" bpmnElement="YesSequenceFlow">
         <di:waypoint x="485" y="127" />
         <di:waypoint x="550" y="127" />
         <bpmndi:BPMNLabel>
@@ -94,7 +93,7 @@
         <di:waypoint x="650" y="127" />
         <di:waypoint x="682" y="127" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_16ti6yq_di" bpmnElement="Flow_16ti6yq">
+      <bpmndi:BPMNEdge id="Flow_16ti6yq_di" bpmnElement="NoSequenceFlow">
         <di:waypoint x="460" y="152" />
         <di:waypoint x="460" y="240" />
         <di:waypoint x="530" y="240" />
