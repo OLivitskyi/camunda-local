@@ -5,10 +5,6 @@
       <bpmn:outgoing>Flow_0d6h9ec</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_0d6h9ec" sourceRef="StartEvent_1" targetRef="Activity_1htx34i" />
-    <bpmn:userTask id="Activity_1htx34i" name="Review Tweet" camunda:candidateGroups="management">
-      <bpmn:incoming>Flow_0d6h9ec</bpmn:incoming>
-      <bpmn:outgoing>Flow_0cm79ed</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:endEvent id="Event_0ty5302" name="Tweet handled">
       <bpmn:incoming>Flow_1rrygea</bpmn:incoming>
     </bpmn:endEvent>
@@ -29,15 +25,19 @@
       <bpmn:incoming>Flow_14ma613</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_14ma613" sourceRef="Activity_0shm435" targetRef="Event_0wktwe4" />
-    <bpmn:scriptTask id="Activity_1rzh25p" name="Publish on Twitter" scriptFormat="javascript">
-      <bpmn:incoming>Flow_0udl7ba</bpmn:incoming>
-      <bpmn:outgoing>Flow_1rrygea</bpmn:outgoing>
-      <bpmn:script>print('Tweet published');</bpmn:script>
-    </bpmn:scriptTask>
     <bpmn:scriptTask id="Activity_0shm435" name="Notify employe of rejection" scriptFormat="javascript">
       <bpmn:incoming>Flow_16ti6yq</bpmn:incoming>
       <bpmn:outgoing>Flow_14ma613</bpmn:outgoing>
       <bpmn:script>print('Tweet rejected');</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="Activity_1rzh25p" name="Publish on Twitter" camunda:class="com.camunda.training.CreateTweetDelegate">
+      <bpmn:incoming>Flow_0udl7ba</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rrygea</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="Activity_1htx34i" name="Review Tweet" scriptFormat="javaScript">
+      <bpmn:incoming>Flow_0d6h9ec</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cm79ed</bpmn:outgoing>
+      <bpmn:script>print('Start process');</bpmn:script>
     </bpmn:scriptTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -47,10 +47,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="165" y="152" width="68" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1vqi9u6_di" bpmnElement="Activity_1htx34i">
-        <dc:Bounds x="270" y="87" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0ty5302_di" bpmnElement="Event_0ty5302">
         <dc:Bounds x="682" y="109" width="36" height="36" />
@@ -73,8 +69,11 @@
       <bpmndi:BPMNShape id="Activity_1fxc5uq_di" bpmnElement="Activity_0shm435">
         <dc:Bounds x="530" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1j591wy_di" bpmnElement="Activity_1rzh25p">
+      <bpmndi:BPMNShape id="Activity_0e0knnd_di" bpmnElement="Activity_1rzh25p">
         <dc:Bounds x="550" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1848ga7_di" bpmnElement="Activity_1htx34i">
+        <dc:Bounds x="270" y="87" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0d6h9ec_di" bpmnElement="Flow_0d6h9ec">
         <di:waypoint x="215" y="127" />
